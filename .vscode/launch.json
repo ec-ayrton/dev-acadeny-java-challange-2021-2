@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-ApiCrudApplication<apicrud>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "mainClass": "br.com.cm.workshop.apicrud.ApiCrudApplication",
+            "projectName": "apicrud",
+            "args": ""
+        }
+    ]
+}
