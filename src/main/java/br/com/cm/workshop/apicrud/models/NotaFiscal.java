@@ -3,12 +3,12 @@ package br.com.cm.workshop.apicrud.models;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.ManyToMany;
+import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -26,6 +26,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "tb_notaFiscal")
 public class NotaFiscal {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,7 +38,7 @@ public class NotaFiscal {
     private Double frete;
     private Double valorTotal;
 
-    @OneToMany(mappedBy = "id")
+    @ManyToMany
     private List<Produto> itens = new ArrayList<>();
 
     public NotaFiscal(String nomeCliente, String endereco, String telefone, Double frete,List<Produto> produtos){
