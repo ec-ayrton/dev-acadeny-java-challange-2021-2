@@ -2,6 +2,7 @@ package br.com.cm.workshop.apicrud.models;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 import lombok.AllArgsConstructor;
@@ -18,7 +19,7 @@ public class Cliente {
    
     
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nome;
     private String endereco;
@@ -26,8 +27,8 @@ public class Cliente {
 
 
     public Cliente(String nome, String endereco, String telefone) {
-        this.nome=nome;
-        this.endereco=endereco;
-        this.telefone=telefone;
+        this.nome = nome;
+        this.endereco = endereco;
+        this.telefone = telefone;
     }
 }
