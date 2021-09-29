@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import br.com.cm.workshop.apicrud.models.Cliente;
 
 @Repository
-public interface ClienteRespository extends JpaRepository<Cliente,Long>{
+public interface ClienteRepository extends JpaRepository<Cliente,Long>{
     
 }
