@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.EntityNotFoundException;
+
 import br.com.cm.workshop.apicrud.models.NotaFiscal;
 import br.com.cm.workshop.apicrud.models.Produto;
 
@@ -27,22 +29,27 @@ public class NotaFiscalService {
         return notarepository.findAll();
     }
 
-    public Optional <NotaFiscal> listarPorId(Long id){
-        return notarepository.findById(id);
+    public NotaFiscal listarPorId(Long id){
+        Optional< NotaFiscal> nota = notarepository.findById(id);
+        return nota.orElseThrow( ()-> new EntityNotFoundException("Nota fiscal não encontrada!")  );
     }
 
     public void remove(Long id) {
-        notarepository.deleteById(id);
+        if(notarepository.existsById(id)){
+            notarepository.deleteById(id);
+        }else{
+            throw new EntityNotFoundException("Nota fiscal não encontrada!");
+        }
+        
     }
 
     public NotaFiscal salvarNotaFiscal(NotaFiscal nota){
-        Boolean encontrados = ItensJaCadastrados(nota);
-        CalcularTotal(nota);
-        if(encontrados){
+        Boolean ItensEncontrados = ItensJaCadastrados(nota);
+        if(ItensEncontrados){
             CalcularTotal(nota);
             return notarepository.saveAndFlush(nota);
         }else{
-            return null;
+            throw new EntityNotFoundException("Há Produtos na lista de itens que não estão cadastrados no sistema.");
         }
     }
 
