@@ -34,10 +34,16 @@ public class Produto {
     private int quantidade;
     private Double valorTotal;
 
-    public Produto(String descricao, double precoUnitario, int quantidade) {
+   
+   
+    public Produto(String descricao, double precoUnitario, int quantidade, Double valorTotal) {
         this.descricao=descricao;
         this.precoUnitario=precoUnitario;
         this.quantidade=quantidade;
-        this.valorTotal=quantidade*precoUnitario;
+        this.valorTotal=valorTotal;
+    }
+
+    public Double valorTotal(int quantidade, Double precoUnitario){
+        return quantidade * precoUnitario;
     }
 }

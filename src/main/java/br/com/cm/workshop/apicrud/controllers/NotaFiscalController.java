@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+
 import br.com.cm.workshop.apicrud.models.NotaFiscal;
 import br.com.cm.workshop.apicrud.services.NotaFiscalService;
 
@@ -43,7 +44,7 @@ public class NotaFiscalController {
     public void remove(@PathVariable Long id) {
         service.remove(id);
     }
-
+    
     @PostMapping
     @ResponseStatus(code = HttpStatus.CREATED)
     public NotaFiscal salvarNota(@RequestBody NotaFiscal notaFiscal){

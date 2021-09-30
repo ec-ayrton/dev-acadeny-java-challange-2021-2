@@ -1,6 +1,8 @@
 package br.com.cm.workshop.apicrud.services;
 
-import java.util.List;
+import java.util.Optional;
+
+//import java.util.List;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +18,7 @@ public class ProdutoService {
     @Autowired
     ProdutoRepository repository;
 
-    public List<Produto> buscarPorDescricao(String descricao){
+    public Optional<Produto> buscarPorDescricao(String descricao){
         return repository.findByDescricao(descricao);
     }
 

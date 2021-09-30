@@ -9,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -41,18 +42,22 @@ public class NotaFiscal {
     private Double valorTotal;
 
     @ManyToMany
+    @NotNull
     private List<Produto> itens = new ArrayList<>();
 
-    public NotaFiscal(String nomeCliente, String endereco, String telefone, Double frete,List<Produto> produtos){
-        this.nomeCliente = nomeCliente;
+   
+
+    public NotaFiscal(String nomeCliente, String endereco, String telefone, Double valorTotalProdutos,Double frete, List<Produto> itens, Double valorTotal) {
+        this.nomeCliente=nomeCliente;
         this.endereco = endereco;
-        this.telefone = telefone;
+        this.telefone=telefone;
+        this.valorTotalProdutos=valorTotalProdutos;
         this.frete = frete;
-        this.itens = produtos;
-        
-        this.valorTotalProdutos = getTotalProdutos();
-        this.valorTotal = this.valorTotalProdutos+this.frete;
+        this.valorTotal=valorTotal;
+        this.itens=itens;
     }
+
+
     @JsonIgnore
     public Double getTotalProdutos(){
         double total = 0.0;
@@ -61,6 +66,4 @@ public class NotaFiscal {
         }
         return total;
     }
-
-
 }
