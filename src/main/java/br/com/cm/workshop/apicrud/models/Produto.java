@@ -1,5 +1,6 @@
 package br.com.cm.workshop.apicrud.models;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -27,6 +28,7 @@ public class Produto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     private Long id;
+    @Column(unique = true)
     private String descricao;
     private Double precoUnitario;
     private int quantidade;
