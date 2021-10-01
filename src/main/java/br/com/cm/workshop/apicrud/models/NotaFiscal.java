@@ -13,6 +13,8 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import br.com.cm.workshop.apicrud.DTOs.ItemResponseDTO;
+import br.com.cm.workshop.apicrud.DTOs.NotaFiscalDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -43,11 +45,11 @@ public class NotaFiscal {
 
     @ManyToMany
     @NotNull
-    private List<Produto> itens = new ArrayList<>();
+    private List<ItemPedido> itens = new ArrayList<>();
 
    
 
-    public NotaFiscal(String nomeCliente, String endereco, String telefone, Double valorTotalProdutos,Double frete, List<Produto> itens, Double valorTotal) {
+    public NotaFiscal(String nomeCliente, String endereco, String telefone, Double valorTotalProdutos,Double frete, List<ItemPedido> itens, Double valorTotal) {
         this.nomeCliente=nomeCliente;
         this.endereco = endereco;
         this.telefone=telefone;
@@ -61,9 +63,30 @@ public class NotaFiscal {
     @JsonIgnore
     public Double getTotalProdutos(){
         double total = 0.0;
-        for(Produto p:itens){
-            total =total + p.getValorTotal();
+        for(ItemPedido item:itens){
+            total =total + item.getValorTotal();
         }
         return total;
     }
+
+
+    public NotaFiscalDTO toNotaFiscalDTO(){
+        NotaFiscalDTO notaResponse = new NotaFiscalDTO();
+        notaResponse.setId(this.id);
+        notaResponse.setNomeCliente(this.nomeCliente);
+        notaResponse.setEndereco(this.endereco);
+        notaResponse.setTelefone(this.telefone);
+        notaResponse.setValorTotalProdutos(this.valorTotalProdutos);
+        notaResponse.setFrete(this.frete);
+        notaResponse.setValorTotal(this.valorTotal);
+        
+        for(ItemPedido pedido: this.itens){
+            ItemResponseDTO itemResponse = new ItemResponseDTO();
+            itemResponse = itemResponse.toItemResponse(pedido);
+            notaResponse.getItens().add(itemResponse);
+            
+        }
+        return notaResponse;
+    }
+
 }
