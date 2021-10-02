@@ -42,6 +42,7 @@ public class NotaFiscal {
     private Double valorTotalProdutos;
     private Double frete;
     private Double valorTotal;
+    private String Status;
 
     @ManyToMany
     @NotNull

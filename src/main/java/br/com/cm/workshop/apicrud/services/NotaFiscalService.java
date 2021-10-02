@@ -83,16 +83,19 @@ public class NotaFiscalService {
         for(ItemPedido item : itens){
             //CASO O VALOR TOTAL DO PRODUTO SEJA DIFERENTE DO VALOR TOTAL INFORMADO NA NOTA, EXEMPLO PRECO=3,QTD=3. VALORTOTALPRODUTO REAL=9, MAS NA NOTA PODERIA ESTAR 7. 
             if( item.getValorTotal() != ( item.getProduto().getPrecoUnitario() * item.getQuantidadeProduto() ) ){
+                System.out.println("Caso 1");
                 throw new UnsupportedOperationException("Valor total do produto"+ item.getProduto().getDescricao() +"é diferente do informado na nota Fiscal.");
             }
             valorTotalItens += item.getValorTotal();
         }
         //CASO A SOMATORIA DO VALOR TOTAL DE TODOS OS PRODUTOS SEJAM DIFERNTE DA SOMATORIA TOTAL INFORMADA NA NOTA. 
         if(valorTotalItens.doubleValue() != notaFiscal.getValorTotalProdutos().doubleValue()   ){
+            System.out.println("Caso 2");
             throw new UnsupportedOperationException("Valor total dos Produtos é diferente do informado na nota Fiscal.");
         }
         //CASO A SOMATORIA DOS VALORES TOTAIS COM O FRETE RESULTE DIFERENTE DO INFORMADO NA NOTA.
         if((valorTotalItens+notaFiscal.getFrete()) != notaFiscal.getValorTotal()){
+            System.out.println("Caso 3");
             throw new UnsupportedOperationException("Valor total real da nota fiscal é diferente do informado na nota Fiscal.");
         }
         else{

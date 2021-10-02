@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-//import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 import br.com.cm.workshop.apicrud.DTOs.NotaFiscalDTO;
 import br.com.cm.workshop.apicrud.models.NotaFiscal;
@@ -56,6 +54,10 @@ public class NotaFiscalController {
     @PostMapping
     @ResponseStatus(code = HttpStatus.CREATED)
     public NotaFiscalDTO salvarNota(@RequestBody NotaFiscalDTO notaFiscal){
+
+        
+     
+
         return service.salvarNotaFiscal(notaFiscal).toNotaFiscalDTO();
     }
 

@@ -1,5 +1,7 @@
 package br.com.cm.workshop.apicrud.DTOs;
 
+import java.io.Serializable;
+
 import br.com.cm.workshop.apicrud.models.ItemPedido;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ItemResponseDTO {
+public class ItemResponseDTO implements Serializable{
     private String descricao;
     private Double precoUnitario;
     private int quantidade;
