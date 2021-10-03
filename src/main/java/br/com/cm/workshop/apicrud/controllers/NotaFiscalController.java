@@ -16,10 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import br.com.cm.workshop.apicrud.DTOs.NotaFiscalDTO;
 import br.com.cm.workshop.apicrud.models.NotaFiscal;
 import br.com.cm.workshop.apicrud.services.NotaFiscalService;
-
+import br.com.cm.workshop.apicrud.models.Status;
 
 @RestController
 @RequestMapping("/api/v1/notas-fiscais")
@@ -53,18 +55,26 @@ public class NotaFiscalController {
     
     @PostMapping
     @ResponseStatus(code = HttpStatus.CREATED)
-    public NotaFiscalDTO salvarNota(@RequestBody NotaFiscalDTO notaFiscal){
-
-        
-     
+    public NotaFiscalDTO salvarNota(@RequestBody @Valid NotaFiscalDTO notaFiscal){
 
         return service.salvarNotaFiscal(notaFiscal).toNotaFiscalDTO();
     }
 
     @PutMapping(value = "/{id}")
     @ResponseStatus(code = HttpStatus.OK)
-    public NotaFiscalDTO salvarNota(@PathVariable Long id, @RequestBody NotaFiscalDTO notaFiscal){
+    public NotaFiscalDTO salvarNota(@PathVariable Long id, @RequestBody @Valid NotaFiscalDTO notaFiscal){
         return service.atualizarNotaFiscal(id, notaFiscal).toNotaFiscalDTO();
     }
 
+    @GetMapping(value = "/{id}/status")
+    @ResponseStatus(code = HttpStatus.OK)
+    public ResponseEntity<String> listarStatusPorIdNota(@PathVariable Long id){
+        return ResponseEntity.ok().body(service.listarPorId(id).toNotaFiscalDTO().getStatus());
+    }
+
+    @PutMapping(value = "/{id}/status")
+    @ResponseStatus(code = HttpStatus.OK)
+    public Status atualizarStatusNota(@PathVariable Long id, @RequestBody Status status ){
+        return service.atualizarStatus(id, status);
+    }
 }

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import br.com.cm.workshop.apicrud.repositories.ItemPedidoRepository;
 import br.com.cm.workshop.apicrud.repositories.NotaFiscalRepository;
 import br.com.cm.workshop.apicrud.repositories.ProdutoRepository;
+import br.com.cm.workshop.apicrud.services.exceptions.StatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,7 @@ import br.com.cm.workshop.apicrud.DTOs.NotaFiscalDTO;
 import br.com.cm.workshop.apicrud.models.ItemPedido;
 import br.com.cm.workshop.apicrud.models.NotaFiscal;
 import br.com.cm.workshop.apicrud.models.Produto;
+import br.com.cm.workshop.apicrud.models.Status;
 
 @Service
 public class NotaFiscalService {
@@ -51,8 +53,10 @@ public class NotaFiscalService {
 
     public NotaFiscal salvarNotaFiscal(NotaFiscalDTO notafiscalDto){
         List<ItemPedido> itens = ValidarItens(notafiscalDto);
+        notafiscalDto.setStatus("PENDENTE");
         NotaFiscal notaFiscalToSave = notafiscalDto.toModel(itens);
         if(ValidarCalculoTotal(notaFiscalToSave)){
+
             return notarepository.saveAndFlush(notaFiscalToSave);
         }else{
             throw new EntityNotFoundException("Há Produtos na lista de itens que não estão cadastrados no sistema.");
@@ -61,9 +65,10 @@ public class NotaFiscalService {
     public NotaFiscal atualizarNotaFiscal(Long id, NotaFiscalDTO notafiscalDto) {
         List<ItemPedido> itens = ValidarItens(notafiscalDto);
         NotaFiscal notaFiscalAtualizada = notafiscalDto.toModel(itens);
-        
-        if(notarepository.existsById(id)){
+        Optional<NotaFiscal> notaFromDb = notarepository.findById(id);
+        if(notaFromDb.isPresent()){
             if(id.equals(notafiscalDto.getId())){
+                notaFiscalAtualizada.setStatus(notaFromDb.get().getStatus());
                 return notarepository.saveAndFlush(notaFiscalAtualizada);
             }else{
                 throw new UnsupportedOperationException("Id informado é diferente do id da nota fiscal");
@@ -73,6 +78,56 @@ public class NotaFiscalService {
             throw new EntityNotFoundException("Nota Fiscal não encontrada!");
     }
 
+    public Status atualizarStatus(Long id, Status status){
+        Optional< NotaFiscal> nota = notarepository.findById(id);
+
+        if(nota.isPresent()){
+            NotaFiscal novaNotaFiscal = nota.get();
+            String statusAntigo = novaNotaFiscal.getStatus();
+            String statusNovo = status.getStatus();
+
+            switch (statusNovo) {
+                case "APROVADA":
+                    if(statusAntigo.equals("EM_PROCESSAMENTO")){
+                        novaNotaFiscal.setStatus(statusNovo);
+                        notarepository.saveAndFlush(novaNotaFiscal);
+                        return new Status(novaNotaFiscal.getStatus());
+                    }else{
+                        throw new StatusException("status não pode ser alterado....");
+                    }
+                   
+                case "EM_PROCESSAMENTO":
+                    if(statusAntigo.equals("PENDENTE") || statusAntigo.equals("COM_ERRO")){
+                        novaNotaFiscal.setStatus(statusNovo);
+                        notarepository.saveAndFlush(novaNotaFiscal);
+                        return new Status(novaNotaFiscal.getStatus());
+                    }else{
+                        throw new StatusException("status não pode ser alterado....");
+                    }
+                
+                case "CANCELADO":
+                    if(statusAntigo.equals("EM_PROCESSAMENTO") || statusAntigo.equals("COM_ERRO")){
+                        novaNotaFiscal.setStatus(statusNovo);
+                        notarepository.saveAndFlush(novaNotaFiscal);
+                        return new Status(novaNotaFiscal.getStatus());
+                    }else{
+                        throw new StatusException("status não pode ser alterado....");
+                    }
+                case "COM_ERRO":
+                    if(statusAntigo.equals("EM_PROCESSAMENTO") || statusAntigo.equals("PENDENTE")){
+                        novaNotaFiscal.setStatus(statusNovo);
+                        notarepository.saveAndFlush(novaNotaFiscal);
+                        return new Status(novaNotaFiscal.getStatus());
+                    }else{
+                        throw new StatusException("status não pode ser alterado....");
+                    }
+                default:
+                    throw new StatusException("status não pode ser alterado....");
+            }
+        }else{
+            throw new StatusException("status não pode ser alterado....");
+        }
+    }
 
 
     ///METODOS AUXILIARES
@@ -84,7 +139,7 @@ public class NotaFiscalService {
             //CASO O VALOR TOTAL DO PRODUTO SEJA DIFERENTE DO VALOR TOTAL INFORMADO NA NOTA, EXEMPLO PRECO=3,QTD=3. VALORTOTALPRODUTO REAL=9, MAS NA NOTA PODERIA ESTAR 7. 
             if( item.getValorTotal() != ( item.getProduto().getPrecoUnitario() * item.getQuantidadeProduto() ) ){
                 System.out.println("Caso 1");
-                throw new UnsupportedOperationException("Valor total do produto"+ item.getProduto().getDescricao() +"é diferente do informado na nota Fiscal.");
+                throw new UnsupportedOperationException("Valor total do produto "+ item.getProduto().getDescricao() +"é diferente do informado na nota Fiscal.");
             }
             valorTotalItens += item.getValorTotal();
         }

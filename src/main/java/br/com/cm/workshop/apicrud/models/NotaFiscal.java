@@ -9,7 +9,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PositiveOrZero;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -33,19 +35,32 @@ import lombok.ToString;
 @ToString
 @Table(name = "tb_notaFiscal")
 public class NotaFiscal {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String nomeCliente;
     private String endereco;
     private String telefone;
+
+    @PositiveOrZero(message = "Valor Total dos Produtos não pode ser negativo.")
+    @NotNull
     private Double valorTotalProdutos;
+
+    @PositiveOrZero(message = "Valor do Frete não pode ser negativo.")
+    @NotNull
     private Double frete;
+
+    @PositiveOrZero(message = "Valor Total não pode ser negativo.")
+    @NotNull
     private Double valorTotal;
-    private String Status;
+    
+    private String Status = "PENDENTE";
 
     @ManyToMany
     @NotNull
+    @NotEmpty(message = "lista de itens não pode estar vazia.")
     private List<ItemPedido> itens = new ArrayList<>();
 
    
@@ -58,6 +73,7 @@ public class NotaFiscal {
         this.frete = frete;
         this.valorTotal=valorTotal;
         this.itens=itens;
+        this.Status = "PENDENTE" ;
     }
 
 
@@ -80,7 +96,9 @@ public class NotaFiscal {
         notaResponse.setValorTotalProdutos(this.valorTotalProdutos);
         notaResponse.setFrete(this.frete);
         notaResponse.setValorTotal(this.valorTotal);
+        notaResponse.setStatus(this.Status);
         
+
         for(ItemPedido pedido: this.itens){
             ItemResponseDTO itemResponse = new ItemResponseDTO();
             itemResponse = itemResponse.toItemResponse(pedido);

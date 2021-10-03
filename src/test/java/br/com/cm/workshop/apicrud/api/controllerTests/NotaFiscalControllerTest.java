@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import br.com.cm.workshop.apicrud.DTOs.ItemResponseDTO;
 import br.com.cm.workshop.apicrud.DTOs.NotaFiscalDTO;
+import br.com.cm.workshop.apicrud.models.Status;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.filter.log.LogDetail;
 import io.restassured.http.ContentType;
@@ -243,9 +244,121 @@ public class NotaFiscalControllerTest {
     ///////////////////////
     //METODOS PUT//////////
     //////////////////////
+    @Test
+    public void deveriaAtualizarUmaNotaFiscalComSucesso() throws JsonProcessingException {
 
+        //CADASTRANDO UMA NOTA FISCAL VALIDA PARA SER Atualizada
+        NotaFiscalDTO  notaCadastrada1=
+        given()
+            .spec(requisicao)
+            .body(objectMapper.writeValueAsString(dadoUmaNotaFiscalPadrao()))
+        .when()
+            .post()
+        .then()
+            .statusCode(HttpStatus.SC_CREATED)
+        .extract()
+            .as(NotaFiscalDTO.class);
+        assertNotNull(notaCadastrada1);
+        assertNotNull(notaCadastrada1.getId());
+        assertEquals(dadoUmaNotaFiscalPadrao().getNomeCliente(), notaCadastrada1.getNomeCliente());
+        assertEquals(dadoUmaNotaFiscalPadrao().getItens(), notaCadastrada1.getItens());
 
+        //instanciando UMA NOTA FISCAL VALIDA PARA SUBSTITUIR A OUTRA
+        NotaFiscalDTO  notaCadastrada2= dadoUmaNotaFiscalPadrao2();
+        notaCadastrada2.setId(notaCadastrada1.getId());
+       
+        //atualizando  a nota fiscal
+        NotaFiscalDTO notaAtualizada =
 
+        given()
+            .spec(requisicao)
+            .body(objectMapper.writeValueAsString(notaCadastrada2))
+        .when()
+            .put("/{id}", notaCadastrada1.getId())
+        .then()
+            .statusCode(HttpStatus.SC_OK)
+        .extract()
+            .as(NotaFiscalDTO.class);;
+
+        assertEquals(notaAtualizada.getId(), notaCadastrada2.getId());
+        assertEquals(notaAtualizada.getNomeCliente(), notaCadastrada2.getNomeCliente());
+        assertEquals(notaAtualizada.getItens(), notaCadastrada2.getItens());
+    }
+
+    @Test
+    public void DeveriaAtualizarStatusParaEmProcessamentoDePendentecomSucesso() throws JsonProcessingException{
+        //CADASTRANDO UMA NOTA FISCAL VALIDA PARA TER O STATUS MUDADO 
+        NotaFiscalDTO  notaCadastrada=
+        given()
+            .spec(requisicao)
+            .body(objectMapper.writeValueAsString(dadoUmaNotaFiscalPadrao()))
+        .when()
+            .post()
+        .then()
+            .statusCode(HttpStatus.SC_CREATED)
+        .extract()
+            .as(NotaFiscalDTO.class);
+
+        assertEquals(notaCadastrada.getStatus(),"PENDENTE" );
+
+        //
+        Status status = DadoUmStatusPadrao();
+        assertEquals(DadoUmStatusPadrao().getStatus(),"PENDENTE" );
+        assertEquals(status.getStatus(),"PENDENTE" );
+        
+        status.setStatus("EM_PROCESSAMENTO");
+
+        Status statusfinal =
+        given()
+            .spec(requisicao)
+            .body(objectMapper.writeValueAsString(status))
+        .when()
+            .put("/{id}/status", notaCadastrada.getId())
+        .then()
+            .statusCode(HttpStatus.SC_OK).extract()
+            .as(Status.class);
+        
+        assertEquals(statusfinal.getStatus(), status.getStatus());
+    }               
+    @Test
+    public void DeveriaAtualizarStatusParaEmProcessamentoDeComErrocomSucesso() throws JsonProcessingException{
+        //CADASTRANDO UMA NOTA FISCAL VALIDA PARA TER O STATUS MUDADO 
+        NotaFiscalDTO  notaCadastrada=
+        given()
+            .spec(requisicao)
+            .body(objectMapper.writeValueAsString(dadoUmaNotaFiscalPadrao()))
+        .when()
+            .post()
+        .then()
+            .statusCode(HttpStatus.SC_CREATED)
+        .extract()
+            .as(NotaFiscalDTO.class);
+
+        assertEquals(notaCadastrada.getStatus(),"PENDENTE" );
+
+        //PREPARANDO MANUALMENTE PRA FAZER AS ALTERAÇÕES VIA REQUISIÇÃO
+        Status status = DadoUmStatusPadrao();
+        assertEquals(DadoUmStatusPadrao().getStatus(),"PENDENTE" );
+        assertEquals(status.getStatus(),"PENDENTE" );
+        notaCadastrada.setStatus("COM_ERRO");
+        assertEquals(notaCadastrada.getStatus(),"COM_ERRO" );
+
+        status.setStatus("EM_PROCESSAMENTO");
+        
+
+        Status statusfinal =
+        given()
+            .spec(requisicao)
+            .body(objectMapper.writeValueAsString(status))
+        .when()
+            .put("/{id}/status", notaCadastrada.getId())
+        .then()
+            .statusCode(HttpStatus.SC_OK)
+        .extract()
+            .as(Status.class);
+        
+        assertEquals(statusfinal.getStatus(), status.getStatus());
+    }   
 
 
 
@@ -260,6 +373,11 @@ public class NotaFiscalControllerTest {
     //METODOS AUXILIARES//
     //////////////////////
 
+    private Status DadoUmStatusPadrao() {
+        Status status = new Status();
+        return status;
+    }
+
     private NotaFiscalDTO dadoUmaNotaFiscalPadrao() {
         ItemResponseDTO itemPadrao1 = new ItemResponseDTO("coca 1L",5.5,1,5.5);
         ItemResponseDTO itemPadrao2 = new ItemResponseDTO("Coxinha",3.0,1,3.0);
@@ -267,6 +385,17 @@ public class NotaFiscalControllerTest {
         NotaFiscalDTO nota = new NotaFiscalDTO("Ayrton Sousa", "Rua Ednir Pinto", "889911223344",8.5 ,5.0, Arrays.asList(itemPadrao1,itemPadrao2),13.5);
         return nota;
     }
+
+    private NotaFiscalDTO dadoUmaNotaFiscalPadrao2() {
+        ItemResponseDTO itemPadrao1 = new ItemResponseDTO("coca 1L",5.5,2,11.0);
+      
+        NotaFiscalDTO nota = new NotaFiscalDTO("Jose Sousa", "Rua JK", "889911223399",11.0 ,5.0, Arrays.asList(itemPadrao1),16.0);
+        return nota;
+    }
+
+
+
+
     private NotaFiscalDTO dadoUmaNotaFiscalPadraoComProdutoNaoCadastrado() {
         ItemResponseDTO itemPadrao1 = new ItemResponseDTO("coca 1L",5.5,1,5.5);
         ItemResponseDTO itemPadrao2 = new ItemResponseDTO("agua",2.0,1,2.0);
