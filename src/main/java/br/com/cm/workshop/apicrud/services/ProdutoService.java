@@ -1,6 +1,6 @@
 package br.com.cm.workshop.apicrud.services;
 
-import java.util.Optional;
+import java.util.List;
 
 //import java.util.List;
 
@@ -18,7 +18,7 @@ public class ProdutoService {
     @Autowired
     ProdutoRepository repository;
 
-    public Optional<Produto> buscarPorDescricao(String descricao){
+    public List<Produto> buscarPorDescricao(String descricao){
         return repository.findByDescricao(descricao);
     }
 

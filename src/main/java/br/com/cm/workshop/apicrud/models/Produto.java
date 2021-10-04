@@ -1,6 +1,5 @@
 package br.com.cm.workshop.apicrud.models;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -34,7 +33,6 @@ public class Produto {
     @JsonIgnore
     private Long id;
 
-    @Column(unique = true)
     @NotEmpty(message = "Nome do Produto não pode estar vazio PRODUTO")
     private String descricao;
 

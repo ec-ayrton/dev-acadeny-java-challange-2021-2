@@ -313,7 +313,7 @@ public class NotaFiscalControllerTest {
             .spec(requisicao)
             .body(objectMapper.writeValueAsString(status))
         .when()
-            .put("/{id}/status", notaCadastrada.getId())
+            .patch("/{id}/status", notaCadastrada.getId())
         .then()
             .statusCode(HttpStatus.SC_OK).extract()
             .as(Status.class);
@@ -351,7 +351,7 @@ public class NotaFiscalControllerTest {
             .spec(requisicao)
             .body(objectMapper.writeValueAsString(status))
         .when()
-            .put("/{id}/status", notaCadastrada.getId())
+            .patch("/{id}/status", notaCadastrada.getId())
         .then()
             .statusCode(HttpStatus.SC_OK)
         .extract()

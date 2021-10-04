@@ -56,7 +56,6 @@ public class NotaFiscalService {
         notafiscalDto.setStatus("PENDENTE");
         NotaFiscal notaFiscalToSave = notafiscalDto.toModel(itens);
         if(ValidarCalculoTotal(notaFiscalToSave)){
-
             return notarepository.saveAndFlush(notaFiscalToSave);
         }else{
             throw new EntityNotFoundException("Há Produtos na lista de itens que não estão cadastrados no sistema.");
@@ -64,7 +63,9 @@ public class NotaFiscalService {
     }
     public NotaFiscal atualizarNotaFiscal(Long id, NotaFiscalDTO notafiscalDto) {
         List<ItemPedido> itens = ValidarItens(notafiscalDto);
+     
         NotaFiscal notaFiscalAtualizada = notafiscalDto.toModel(itens);
+        
         Optional<NotaFiscal> notaFromDb = notarepository.findById(id);
         if(notaFromDb.isPresent()){
             if(id.equals(notafiscalDto.getId())){
@@ -106,12 +107,12 @@ public class NotaFiscalService {
                     }
                 
                 case "CANCELADO":
-                    if(statusAntigo.equals("EM_PROCESSAMENTO") || statusAntigo.equals("COM_ERRO")){
+                    if(statusAntigo.equals("EM_PROCESSAMENTO") || statusAntigo.equals("CANCELADO")){
+                        throw new StatusException("status não pode ser alterado....");
+                    }else{
                         novaNotaFiscal.setStatus(statusNovo);
                         notarepository.saveAndFlush(novaNotaFiscal);
                         return new Status(novaNotaFiscal.getStatus());
-                    }else{
-                        throw new StatusException("status não pode ser alterado....");
                     }
                 case "COM_ERRO":
                     if(statusAntigo.equals("EM_PROCESSAMENTO") || statusAntigo.equals("PENDENTE")){
@@ -137,20 +138,18 @@ public class NotaFiscalService {
         
         for(ItemPedido item : itens){
             //CASO O VALOR TOTAL DO PRODUTO SEJA DIFERENTE DO VALOR TOTAL INFORMADO NA NOTA, EXEMPLO PRECO=3,QTD=3. VALORTOTALPRODUTO REAL=9, MAS NA NOTA PODERIA ESTAR 7. 
-            if( item.getValorTotal() != ( item.getProduto().getPrecoUnitario() * item.getQuantidadeProduto() ) ){
-                System.out.println("Caso 1");
-                throw new UnsupportedOperationException("Valor total do produto "+ item.getProduto().getDescricao() +"é diferente do informado na nota Fiscal.");
+            if( item.getValorTotal() != ( item.getProduto().getPrecoUnitario() * item.getQuantidadeProduto() ) ){         
+
+                throw new UnsupportedOperationException("Valor total do produto "+ item.getProduto().getDescricao() +" é diferente do informado na nota Fiscal.");
             }
             valorTotalItens += item.getValorTotal();
         }
         //CASO A SOMATORIA DO VALOR TOTAL DE TODOS OS PRODUTOS SEJAM DIFERNTE DA SOMATORIA TOTAL INFORMADA NA NOTA. 
         if(valorTotalItens.doubleValue() != notaFiscal.getValorTotalProdutos().doubleValue()   ){
-            System.out.println("Caso 2");
             throw new UnsupportedOperationException("Valor total dos Produtos é diferente do informado na nota Fiscal.");
         }
         //CASO A SOMATORIA DOS VALORES TOTAIS COM O FRETE RESULTE DIFERENTE DO INFORMADO NA NOTA.
         if((valorTotalItens+notaFiscal.getFrete()) != notaFiscal.getValorTotal()){
-            System.out.println("Caso 3");
             throw new UnsupportedOperationException("Valor total real da nota fiscal é diferente do informado na nota Fiscal.");
         }
         else{
@@ -167,19 +166,30 @@ public class NotaFiscalService {
         for(ItemResponseDTO itemFromDto: listaItens){
             ItemPedido  itemPedidoToSave = new ItemPedido();
 
-            Optional<Produto> produtoFromDb = produtorepository.findByDescricao(itemFromDto.getDescricao());
+            List<Produto> produtosFromDb = produtorepository.findByDescricao(itemFromDto.getDescricao());
             //ACHADO UM PRODUTO JA CADASTRADO COM A DESCRICAO.
-            if(produtoFromDb.isPresent()){
-                itemPedidoToSave.setProduto(produtoFromDb.get());
-        }   else{
-            //O IDEAL AQUI SERIA LANÇAR UMA EXCEÇÃO UMA VEZ QUE O PRODUTO NAO FOI ENCONTRADO NO SISTEMA.MAS COMO NÃO HÁ REGRA DE NEGOCIO PREVIA.
-            Produto novoProduto = new Produto(itemFromDto.getDescricao(),itemFromDto.getPrecoUnitario());
-            novoProduto = produtorepository.save(novoProduto);
-            itemPedidoToSave.setProduto(novoProduto);
+            if(!produtosFromDb.isEmpty()){
+                for(Produto p: produtosFromDb){
+                    if(p.getDescricao().equals(itemFromDto.getDescricao()) && p.getPrecoUnitario().equals(itemFromDto.getPrecoUnitario())){
+                        itemPedidoToSave.setProduto(p);
+                    }else{
+                        Produto novoProduto = new Produto(itemFromDto.getDescricao(),itemFromDto.getPrecoUnitario());
+                        novoProduto = produtorepository.save(novoProduto);
+                        itemPedidoToSave.setProduto(novoProduto);
+                    }
+                    
+                }
+            }else{
+            //O IDEAL AQUI SERIA LANÇAR UMA EXCEÇÃO UMA VEZ QUE O PRODUTO NAO FOI ENCONTRADO NO SISTEMA.MAS COMO NÃO HÁ REGRA DE NEGOCIO PREVIA. 
+
+                Produto novoProduto = new Produto(itemFromDto.getDescricao(),itemFromDto.getPrecoUnitario());
+                novoProduto = produtorepository.save(novoProduto);
+                itemPedidoToSave.setProduto(novoProduto);
             }
             itemPedidoToSave.setQuantidadeProduto(itemFromDto.getQuantidade());
             itemPedidoToSave.setValorTotal(itemFromDto.getValorTotal());
             itemPedidoToSave = itemPedidoRepository.save(itemPedidoToSave);
+           
             novaList.add(itemPedidoToSave);
         }
         return novaList;

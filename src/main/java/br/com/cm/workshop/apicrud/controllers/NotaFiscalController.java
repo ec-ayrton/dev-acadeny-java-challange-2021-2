@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -72,7 +73,7 @@ public class NotaFiscalController {
         return ResponseEntity.ok().body(service.listarPorId(id).toNotaFiscalDTO().getStatus());
     }
 
-    @PutMapping(value = "/{id}/status")
+    @PatchMapping(value = "/{id}/status")
     @ResponseStatus(code = HttpStatus.OK)
     public Status atualizarStatusNota(@PathVariable Long id, @RequestBody Status status ){
         return service.atualizarStatus(id, status);

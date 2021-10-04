@@ -9,7 +9,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
 
@@ -60,7 +59,6 @@ public class NotaFiscal {
 
     @ManyToMany
     @NotNull
-    @NotEmpty(message = "lista de itens não pode estar vazia.")
     private List<ItemPedido> itens = new ArrayList<>();
 
    
